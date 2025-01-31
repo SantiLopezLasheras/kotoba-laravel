@@ -26,7 +26,7 @@ class FlashcardController extends Controller
     // Guardar una tarjeta
     public function store(Request $request, $listId)
     {
-        // buscar lista 
+        // buscar lista
         $list = Lista::findOrFail($listId);
 
         $validated = $request->validate([

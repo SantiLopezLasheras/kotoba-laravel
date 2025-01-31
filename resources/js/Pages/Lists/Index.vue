@@ -18,7 +18,7 @@ export default {
         };
 
         const abrirLista = (list) => {
-            Inertia.visit(`/lists/${list.id}`);
+            Inertia.visit(`/lists/${list.id}/flashcards`);
         };
 
         const createNewList = () => {
@@ -190,6 +190,12 @@ export default {
                                 class="px-3 py-1 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-all focus:outline-none focus:ring-2 focus:ring-gray-500"
                             >
                                 Abrir lista
+                            </button>
+                            <button
+                                @click="abrirLista(list)"
+                                class="px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 transition-all focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            >
+                                Repasar
                             </button>
                             <button
                                 @click="mostrarLista(list)"
