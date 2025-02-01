@@ -35,6 +35,11 @@ export default {
             }
         };
 
+        const visitGames = (id) =>
+            Inertia.visit(`/games/repasar?listId=${id}`, {
+                method: "get",
+            });
+
         const editarLista = (list) => {
             formData.value = { ...list };
             listaSeleccionada.value = list;
@@ -81,6 +86,7 @@ export default {
             formData,
             guardarLista,
             abrirLista,
+            visitGames,
         };
     },
     props: {
@@ -192,7 +198,7 @@ export default {
                                 Abrir lista
                             </button>
                             <button
-                                @click="abrirLista(list)"
+                                @click="visitGames(list.id)"
                                 class="px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 transition-all focus:outline-none focus:ring-2 focus:ring-gray-500"
                             >
                                 Repasar

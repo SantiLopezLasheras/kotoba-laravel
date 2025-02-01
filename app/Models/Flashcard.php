@@ -21,8 +21,8 @@ class Flashcard extends Model
         'notas',
     ];
 
-    // public function list()
-    // {
-    //     return $this->belongsTo(ListModel::class);
-    // }
+    public function list()
+    {
+        return $this->belongsTo(Lista::class, 'list_id');
+    }
 }

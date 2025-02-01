@@ -18,8 +18,6 @@ Route::get('/', function () {
     ]);
 });
 
-// Games
-Route::get('/games', [GamesController::class, 'index'])->name('games.index');
 
 // Listas
 Route::get('/lists', [ListController::class, 'index'])->name('lists.index');
@@ -37,6 +35,11 @@ Route::post('/lists/{listId}/flashcards', [FlashcardController::class, 'store'])
 Route::get('/lists/{listId}/flashcards/{flashcardId}/edit', [FlashcardController::class, 'edit'])->name('flashcards.edit');
 Route::put('/lists/{listId}/flashcards/{flashcardId}', [FlashcardController::class, 'update'])->name('flashcards.update');
 Route::delete('/lists/{listId}/flashcards/{flashcardId}', [FlashcardController::class, 'destroy'])->name('flashcards.destroy');
+
+
+// Games
+Route::get('/games', [GamesController::class, 'index'])->name('games.index');
+Route::get('/games/repasar', [GamesController::class, 'repasar'])->name('games.repasar');
 
 Route::middleware([
     'auth:sanctum',

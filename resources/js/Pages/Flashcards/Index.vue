@@ -221,11 +221,12 @@
                             </div>
                             <div class="mt-4 sm:mt-0 flex space-x-4">
                                 <button
-                                    @click="editFlashcard(flashcard)"
+                                    @click="editFlashcard(flashcard, $event)"
                                     class="px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     Editar
                                 </button>
+
                                 <button
                                     @click="deleteFlashcard(flashcard.id)"
                                     class="px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -441,7 +442,7 @@ export default {
                 },
             });
         },
-        editFlashcard(flashcard) {
+        editFlashcard(flashcard, event) {
             event.stopPropagation();
             this.selectedFlashcard = { ...flashcard };
             this.isEditing = true;
@@ -450,7 +451,6 @@ export default {
             //     `/lists/${this.list.id}/flashcards/${flashcardId}/edit`
             // );
         },
-
         selectFlashcard(flashcard) {
             this.selectedFlashcard = flashcard;
             this.isEditing = false;
