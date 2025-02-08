@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Flashcard;
 use App\Models\Lista;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class FlashcardController extends Controller
 {
@@ -12,6 +13,7 @@ class FlashcardController extends Controller
     public function index($listId)
     {
         $list = Lista::findOrFail($listId);
+        Gate::authorize('view', $list);
         $flashcards = $list->flashcards;
 
         return inertia('Flashcards/Index', ['list' => $list, 'flashcards' => $flashcards]);

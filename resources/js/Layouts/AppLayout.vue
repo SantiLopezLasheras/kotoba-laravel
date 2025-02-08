@@ -48,7 +48,9 @@ const logout = () => {
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationMark class="block h-9 w-auto" />
+                                    <ApplicationMark
+                                        class="block h-12 w-auto"
+                                    />
                                 </Link>
                             </div>
 
@@ -68,6 +70,13 @@ const logout = () => {
                                     :active="route().current('lists.index')"
                                 >
                                     Listas
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user"
+                                    as="button"
+                                    @click="logout"
+                                >
+                                    Cerrar Sesión
                                 </NavLink>
                             </div>
                         </div>

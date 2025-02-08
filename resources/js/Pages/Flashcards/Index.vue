@@ -1,6 +1,57 @@
 <template>
     <!-- Header -->
     <header
+        class="bg-white dark:bg-gray-800 rounded-b-md grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
+    >
+        <div
+            class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 lg:grid-cols-3"
+        >
+            <img
+                src="/images/kotoba.png"
+                alt="Kotoba"
+                class="w-full md:w-1/2 h-auto rounded-md shadow-lg pl-5"
+            />
+        </div>
+
+        <nav class="-mx-3 flex flex-1 justify-end ml-auto pr-5">
+            <Link
+                v-if="
+                    $page.props.auth.user &&
+                    $page.props.auth.user.role === 'admin'
+                "
+                :href="route('dashboard')"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+            >
+                Dashboard
+            </Link>
+
+            <template v-if="$page.props.auth.user">
+                <Link
+                    :href="route('lists.index')"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Listas
+                </Link>
+
+                <Link
+                    :href="route('games.index')"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Juegos
+                </Link>
+                <Link
+                    v-if="$page.props.auth.user"
+                    as="button"
+                    @click="logout"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Cerrar Sesión
+                </Link>
+            </template>
+        </nav>
+    </header>
+
+    <!-- <header
         class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
     >
         <div
@@ -12,7 +63,31 @@
                 class="w-full md:w-1/2 h-auto rounded-md shadow-lg pl-5"
             />
         </div>
-    </header>
+
+        <template v-if="$page.props.auth.user">
+            <Link
+                :href="route('lists.index')"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+            >
+                Listas
+            </Link>
+
+            <Link
+                :href="route('games.index')"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+            >
+                Juegos
+            </Link>
+            <Link
+                v-if="$page.props.auth.user"
+                as="button"
+                @click="logout"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+            >
+                Cerrar Sesión
+            </Link>
+        </template>
+    </header> -->
 
     <div class="max-w-7xl mx-auto py-10">
         <h1
@@ -408,67 +483,136 @@
     </footer>
 </template>
 
-<script>
+<script setup>
 import { Inertia } from "@inertiajs/inertia";
+import { Link, usePage } from "@inertiajs/vue3";
+import { ref } from "vue";
 
-export default {
-    props: {
-        flashcards: Array,
-        list: Object,
+const props = defineProps({
+    flashcards: Array,
+    list: Object,
+    canLogin: {
+        type: Boolean,
     },
-    data() {
-        return {
-            viewMode: "list",
-            selectedFlashcard: null,
-            isEditing: false,
-            updatedFlashcard: {},
-        };
+    canRegister: {
+        type: Boolean,
     },
-    methods: {
-        toggleViewMode(mode) {
-            this.viewMode = mode;
-        },
-        deleteFlashcard(flashcardId) {
-            const listId = this.list.id;
+});
 
-            Inertia.delete(`/lists/${listId}/flashcards/${flashcardId}`, {
-                onSuccess: () => {
-                    this.flashcards = this.flashcards.filter(
-                        (flashcard) => flashcard.id !== flashcardId
-                    );
-                },
-                onError: (error) => {
-                    console.error("Error al borrar tarjeta:", error);
-                },
-            });
-        },
-        editFlashcard(flashcard, event) {
-            event.stopPropagation();
-            this.selectedFlashcard = { ...flashcard };
-            this.isEditing = true;
-            this.updatedFlashcard = { ...flashcard };
-            // Inertia.visit(
-            //     `/lists/${this.list.id}/flashcards/${flashcardId}/edit`
-            // );
-        },
-        selectFlashcard(flashcard) {
-            this.selectedFlashcard = flashcard;
-            this.isEditing = false;
-        },
-        createNewTarjeta(list) {
-            Inertia.visit(`/lists/${list.id}/flashcards/create`);
-        },
-        async updateFlashcard() {
-            try {
-                await Inertia.put(
-                    `/lists/${this.list.id}/flashcards/${this.updatedFlashcard.id}`,
-                    this.updatedFlashcard
-                );
-                this.isEditing = false;
-            } catch (error) {
-                console.error("Error al actualizar la tarjeta:", error);
-            }
-        },
-    },
+const viewMode = ref("list");
+const selectedFlashcard = ref(null);
+const isEditing = ref(false);
+const updatedFlashcard = ref({});
+
+const toggleViewMode = (mode) => {
+    viewMode.value = mode;
 };
+
+const deleteFlashcard = (flashcardId) => {
+    const listId = props.list.id;
+
+    Inertia.delete(`/lists/${listId}/flashcards/${flashcardId}`, {
+        onSuccess: () => {
+            props.flashcards = props.flashcards.filter(
+                (flashcard) => flashcard.id !== flashcardId
+            );
+        },
+        onError: (error) => {
+            console.error("Error al borrar tarjeta:", error);
+        },
+    });
+};
+
+const editFlashcard = (flashcard, event) => {
+    event.stopPropagation();
+    selectedFlashcard.value = { ...flashcard };
+    isEditing.value = true;
+    updatedFlashcard.value = { ...flashcard };
+};
+
+const selectFlashcard = (flashcard) => {
+    selectedFlashcard.value = flashcard;
+    isEditing.value = false;
+};
+
+const createNewTarjeta = (list) => {
+    Inertia.visit(`/lists/${list.id}/flashcards/create`);
+};
+
+const updateFlashcard = async () => {
+    try {
+        await Inertia.put(
+            `/lists/${props.list.id}/flashcards/${updatedFlashcard.value.id}`,
+            updatedFlashcard.value
+        );
+        isEditing.value = false;
+    } catch (error) {
+        console.error("Error al actualizar la tarjeta:", error);
+    }
+};
+
+const logout = () => {
+    Inertia.post(route("logout"));
+};
+
+// export default {
+//     props: {
+//         flashcards: Array,
+//         list: Object,
+//     },
+//     data() {
+//         return {
+//             viewMode: "list",
+//             selectedFlashcard: null,
+//             isEditing: false,
+//             updatedFlashcard: {},
+//         };
+//     },
+//     methods: {
+//         toggleViewMode(mode) {
+//             this.viewMode = mode;
+//         },
+//         deleteFlashcard(flashcardId) {
+//             const listId = this.list.id;
+
+//             Inertia.delete(`/lists/${listId}/flashcards/${flashcardId}`, {
+//                 onSuccess: () => {
+//                     this.flashcards = this.flashcards.filter(
+//                         (flashcard) => flashcard.id !== flashcardId
+//                     );
+//                 },
+//                 onError: (error) => {
+//                     console.error("Error al borrar tarjeta:", error);
+//                 },
+//             });
+//         },
+//         editFlashcard(flashcard, event) {
+//             event.stopPropagation();
+//             this.selectedFlashcard = { ...flashcard };
+//             this.isEditing = true;
+//             this.updatedFlashcard = { ...flashcard };
+//             // Inertia.visit(
+//             //     `/lists/${this.list.id}/flashcards/${flashcardId}/edit`
+//             // );
+//         },
+//         selectFlashcard(flashcard) {
+//             this.selectedFlashcard = flashcard;
+//             this.isEditing = false;
+//         },
+//         createNewTarjeta(list) {
+//             Inertia.visit(`/lists/${list.id}/flashcards/create`);
+//         },
+//         async updateFlashcard() {
+//             try {
+//                 await Inertia.put(
+//                     `/lists/${this.list.id}/flashcards/${this.updatedFlashcard.id}`,
+//                     this.updatedFlashcard
+//                 );
+//                 this.isEditing = false;
+//             } catch (error) {
+//                 console.error("Error al actualizar la tarjeta:", error);
+//             }
+//         },
+//     },
+// };
 </script>

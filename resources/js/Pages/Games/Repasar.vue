@@ -1,7 +1,7 @@
 <template>
     <!-- Header -->
     <header
-        class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
+        class="bg-white dark:bg-gray-800 rounded-b-md grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
     >
         <div
             class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 lg:grid-cols-3"
@@ -12,6 +12,43 @@
                 class="w-full md:w-1/2 h-auto rounded-md shadow-lg pl-5"
             />
         </div>
+
+        <nav class="-mx-3 flex flex-1 justify-end ml-auto pr-5">
+            <Link
+                v-if="
+                    $page.props.auth.user &&
+                    $page.props.auth.user.role === 'admin'
+                "
+                :href="route('dashboard')"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+            >
+                Dashboard
+            </Link>
+
+            <template v-if="$page.props.auth.user">
+                <Link
+                    :href="route('lists.index')"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Listas
+                </Link>
+
+                <Link
+                    :href="route('games.index')"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Juegos
+                </Link>
+                <button
+                    v-if="$page.props.auth.user"
+                    as="button"
+                    @click="logout"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                >
+                    Cerrar Sesión
+                </button>
+            </template>
+        </nav>
     </header>
 
     <div class="flex flex-col items-center justify-start min-h-[500px] mt-8">
@@ -78,6 +115,7 @@
             </div>
         </div>
         <button
+            v-if="flashcards.length > 0"
             @click="mostrarTarjetaSiguiente"
             class="mt-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all"
         >
@@ -123,7 +161,46 @@
     </footer>
 </template>
 
-<script>
+<script setup>
+import { Inertia } from "@inertiajs/inertia";
+import { Link, usePage } from "@inertiajs/vue3";
+import { ref, defineProps } from "vue";
+
+const props = defineProps({
+    lista: Object,
+    flashcards: Array,
+});
+
+const mostrar = ref(false);
+const tarjetasBarajadas = ref([]);
+const currentIndex = ref(0);
+
+const logout = () => {
+    Inertia.post(route("logout"));
+};
+
+const barajarTarjetas = () => {
+    tarjetasBarajadas.value = [
+        ...props.flashcards.sort(() => Math.random() - 0.5),
+    ];
+};
+
+const mostrarTarjetaSiguiente = () => {
+    currentIndex.value++;
+
+    // si ya hemos repasado todas las tarjetas, volvemos a empezar
+    if (currentIndex.value >= tarjetasBarajadas.value.length) {
+        currentIndex.value = 0;
+    }
+
+    mostrar.value = false;
+};
+
+// barajar el mazo de flashcards al montar el componente
+barajarTarjetas();
+</script>
+
+<!-- <script>
 import { isGetAccessor } from "typescript";
 
 export default {
@@ -164,4 +241,4 @@ export default {
         },
     },
 };
-</script>
+</script> -->

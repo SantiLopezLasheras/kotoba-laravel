@@ -4,22 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Models\Lista;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
 {
     // Mostrar todas las listas
-    public function index()
+    public function index(Request $request)
     {
-        $lists = Lista::all();
-        return inertia('Lists/Index', ['lists' => $lists]);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            $lists = Lista::orderByDesc('created_at')->get();
+            return inertia('Lists/Index', ['lists' => $lists]);
+        }
+
+        $lists = Lista::where('user_id', Auth::id())->orWhere('is_public', true)->orderByDesc('created_at')->get();
+        return inertia('Lists/Index', ['lists' => $lists, 'user' => $user]);
     }
 
-    // Mostrar una lista
-    public function show($id)
-{
-    $list = Lista::findOrFail($id);
-    return inertia('Lists/Show', ['list' => $list]);
-}
+
+    // public function index(Request $request)
+    // {
+    //     $filter = $request->input('filter', 'all');
+
+    //     $query = Lista::query();
+
+    //     if ($filter === 'mine') {
+    //         $query->where('user_id', Auth::id());
+    //     } elseif ($filter === 'public') {
+    //         $query->where('is_public', true);
+    //     } else {
+    //         $query->where(function ($query) {
+    //             $query->where('user_id', Auth::id())
+    //                   ->orWhere('is_public', true);
+    //         });
+    //     }
+
+    //     $lists = $query->get();
+
+    //     return inertia('Lists/Index', ['lists' => $lists]);
+    // }
 
     // Mostrar formulario para crear una lista
     public function create()
@@ -31,21 +56,16 @@ class ListController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'idioma' => 'required|string|max:50',
+            'nombre' => 'required|string|min:2|max:255',
+            'idioma' => 'required|string|min:2|max:50',
             'nivel' => 'required|in:principiante,intermedio,avanzado',
         ]);
+
+        $validated['user_id'] = Auth::id();
 
         Lista::create($validated);
 
         return redirect()->route('lists.index');
-    }
-
-    // Mostrar formulario para editar lista
-    public function edit($id)
-    {
-        $list = Lista::findOrFail($id);
-        return inertia('Lists/Edit', ['list' => $list]);
     }
 
     // Actualizar lista
@@ -58,6 +78,7 @@ class ListController extends Controller
         ]);
 
         $list = Lista::findOrFail($id);
+        Gate::authorize('delete', $list);
         $list->update($validated);
 
         return redirect()->route('lists.index');
@@ -67,6 +88,7 @@ class ListController extends Controller
     public function destroy($id)
     {
         $list = Lista::findOrFail($id);
+        Gate::authorize('delete', $list);
         $list->delete();
 
         return redirect()->route('lists.index');

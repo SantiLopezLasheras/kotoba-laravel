@@ -29,6 +29,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'login_count',
     ];
 
     /**
@@ -63,5 +64,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function lists()
+    {
+        return $this->hasMany(Lista::class);
+    }
+
+    public function loginHistories()
+    {
+        return $this->hasMany(LoginHistory::class);
     }
 }

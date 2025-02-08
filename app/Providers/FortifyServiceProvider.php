@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use App\Models\User;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,17 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+
+        // comprobar si la cuenta está activa
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->input('email'))->first();
+
+            if ($user && !$user->is_active) {
+                abort(403, 'Tu cuenta está deshabilitada.');
+            }
+
+            return $user;
+        });
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());

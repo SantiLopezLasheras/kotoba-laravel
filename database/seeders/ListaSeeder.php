@@ -17,24 +17,32 @@ class ListaSeeder extends Seeder
             'nombre' => 'Vocabulario básico',
             'idioma' => 'inglés',
             'nivel' => 'principiante',
+            'is_public' => true,
+            'user_id' => 1,
         ]);
 
         Lista::factory()->create([
             'nombre' => 'Frases hechas',
             'idioma' => 'inglés',
             'nivel' => 'avanzado',
+            'is_public' => true,
+            'user_id' => 1,
         ]);
 
         Lista::factory()->create([
             'nombre' => 'HSK 1',
             'idioma' => 'chino',
             'nivel' => 'principiante',
+            'is_public' => true,
+            'user_id' => 1,
         ]);
 
         Lista::factory()->create([
             'nombre' => 'Animales',
             'idioma' => 'francés',
             'nivel' => 'principiante',
+            'is_public' => true,
+            'user_id' => 1,
         ]);
     }
 }

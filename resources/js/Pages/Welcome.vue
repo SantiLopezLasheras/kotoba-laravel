@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 
 defineProps({
     canLogin: {
@@ -9,13 +9,17 @@ defineProps({
         type: Boolean,
     },
 });
+
+const logout = () => {
+    router.post(route("logout"));
+};
 </script>
 
 <template>
     <Head title="Kotoba" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
         <div
-            class="relative min-h-screen flex flex-col items-center justify-between selection:bg-[#FF2D20] selection:text-white"
+            class="relative min-h-screen flex flex-col items-center justify-between"
         >
             <div class="relative w-full max-w-7xl px-6 lg:max-w-7xl">
                 <header
@@ -30,38 +34,51 @@ defineProps({
                             class="w-full md:w-1/2 h-auto rounded-md shadow-lg pl-5"
                         />
                     </div>
+
                     <nav
                         v-if="canLogin"
                         class="-mx-3 flex flex-1 justify-end ml-auto pr-5"
                     >
                         <Link
-                            v-if="$page.props.auth.user"
+                            v-if="
+                                $page.props.auth.user &&
+                                $page.props.auth.user.role === 'admin'
+                            "
                             :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                         >
                             Dashboard
+                        </Link>
+
+                        <Link
+                            :href="route('games.index')"
+                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
+                        >
+                            Juegos
                         </Link>
 
                         <template v-if="$page.props.auth.user">
                             <Link
                                 :href="route('lists.index')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                             >
                                 Listas
                             </Link>
 
-                            <Link
-                                :href="route('games.index')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                            <button
+                                v-if="$page.props.auth.user"
+                                as="button"
+                                @click="logout"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                             >
-                                Juegos
-                            </Link>
+                                Cerrar Sesión
+                            </button>
                         </template>
 
                         <template v-else>
                             <Link
                                 :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                             >
                                 Iniciar sesión
                             </Link>
@@ -69,7 +86,7 @@ defineProps({
                             <Link
                                 v-if="canRegister"
                                 :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                             >
                                 Registrarse
                             </Link>
@@ -101,11 +118,20 @@ defineProps({
                                 Crea tus listas de vocabulario y aprende con
                                 juegos.
                             </p>
-                            <button
+                            <Link
+                                v-if="!$page.props.auth.user"
+                                :href="route('login')"
                                 class="px-6 py-2 bg-[#FF2D20] text-white rounded-md shadow-md hover:bg-[#e02a1b] transition-all"
                             >
                                 Iniciar sesión
-                            </button>
+                            </Link>
+                            <Link
+                                v-if="$page.props.auth.user"
+                                :href="route('lists.index')"
+                                class="px-6 py-2 bg-[#28a745] text-white rounded-md shadow-md hover:bg-[#218838] transition-all"
+                            >
+                                Ver listas
+                            </Link>
                         </div>
                     </div>
                 </section>

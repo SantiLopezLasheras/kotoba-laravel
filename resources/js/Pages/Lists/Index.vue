@@ -1,9 +1,13 @@
-<script>
-import { Inertia } from "@inertiajs/inertia";
+<!-- <script>
+import { Inertia, usePage } from "@inertiajs/inertia";
 import { ref } from "vue";
 
 export default {
     setup() {
+        const logout = () => {
+            router.post(route("logout"));
+        };
+
         const listaSeleccionada = ref(null);
         const editando = ref(false);
         const formData = ref({
@@ -87,18 +91,19 @@ export default {
             guardarLista,
             abrirLista,
             visitGames,
+            logout,
         };
     },
     props: {
         lists: Array,
     },
 };
-</script>
+</script> -->
 
 <template>
     <!-- Header -->
     <header
-        class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
+        class="bg-white dark:bg-gray-800 rounded-b-md grid grid-cols-2 items-center gap-2 py-6 lg:grid-cols-3 lg:flex lg:justify-between lg:items-center"
     >
         <div
             class="bg-white dark:bg-gray-800 grid grid-cols-2 items-center gap-2 lg:grid-cols-3"
@@ -109,11 +114,15 @@ export default {
                 class="w-full md:w-1/2 h-auto rounded-md shadow-lg pl-5"
             />
         </div>
-        <!-- <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end ml-auto pr-5">
+
+        <nav class="-mx-3 flex flex-1 justify-end ml-auto pr-5">
             <Link
-                v-if="$page.props.auth.user"
+                v-if="
+                    $page.props.auth.user &&
+                    $page.props.auth.user.role === 'admin'
+                "
                 :href="route('dashboard')"
-                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
             >
                 Dashboard
             </Link>
@@ -121,36 +130,27 @@ export default {
             <template v-if="$page.props.auth.user">
                 <Link
                     :href="route('lists.index')"
-                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                 >
                     Listas
                 </Link>
 
                 <Link
                     :href="route('games.index')"
-                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                 >
                     Juegos
                 </Link>
-            </template>
-
-            <template v-else>
-                <Link
-                    :href="route('login')"
-                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                <button
+                    v-if="$page.props.auth.user"
+                    as="button"
+                    @click="logout"
+                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 dark:text-white dark:hover:text-white/80"
                 >
-                    Iniciar sesión
-                </Link>
-
-                <Link
-                    v-if="canRegister"
-                    :href="route('register')"
-                    class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                >
-                    Registrarse
-                </Link>
+                    Cerrar Sesión
+                </button>
             </template>
-        </nav> -->
+        </nav>
     </header>
 
     <div class="max-w-7xl mx-auto py-10">
@@ -159,29 +159,47 @@ export default {
         >
             Listas de vocabulario
         </h1>
-        <button
-            @click="createNewList"
-            class="flex gap-2 items-center px-4 py-2 mb-5 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-            <span>Crear nueva lista</span>
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
+
+        <div class="flex justify-between items-center mb-4">
+            <button
+                @click="createNewList"
+                class="flex gap-2 items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-                <path
-                    fill="currentColor"
-                    d="M13 6a1 1 0 1 0-2 0v5H6a1 1 0 1 0 0 2h5v5a1 1 0 1 0 2 0v-5h5a1 1 0 1 0 0-2h-5z"
-                />
-            </svg>
-        </button>
+                <span>Crear nueva lista</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        fill="currentColor"
+                        d="M13 6a1 1 0 1 0-2 0v5H6a1 1 0 1 0 0 2h5v5a1 1 0 1 0 2 0v-5h5a1 1 0 1 0 0-2h-5z"
+                    />
+                </svg>
+            </button>
+
+            <div class="flex gap-4">
+                <label>
+                    <input type="radio" value="mine" v-model="filter" />
+                    Mis listas
+                </label>
+                <label>
+                    <input type="radio" value="public" v-model="filter" />
+                    Listas públicas
+                </label>
+                <label>
+                    <input type="radio" value="all" v-model="filter" />
+                    Todas las listas
+                </label>
+            </div>
+        </div>
 
         <div class="flex space-x-8">
             <div class="w-3/5">
                 <ul class="space-y-4">
                     <li
-                        v-for="list in lists"
+                        v-for="list in filteredLists"
                         :key="list.id"
                         class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow"
                     >
@@ -342,3 +360,107 @@ export default {
         </div>
     </footer>
 </template>
+
+<script setup>
+import { Inertia } from "@inertiajs/inertia";
+import { Link } from "@inertiajs/vue3";
+import { ref, defineProps, watch } from "vue";
+
+const props = defineProps({
+    lists: Array,
+    user: Object,
+});
+
+const filter = ref("all");
+const filteredLists = ref(props.lists);
+
+// Vue watch para observar cualquier cambio en la propiedad filter
+watch(filter, (newFilter) => {
+    if (newFilter === "mine") {
+        filteredLists.value = props.lists.filter(
+            (list) => list.user_id === props.user.id
+        );
+    } else if (newFilter === "public") {
+        filteredLists.value = props.lists.filter(
+            (list) => list.is_public === true
+        );
+    } else {
+        filteredLists.value = props.lists;
+    }
+});
+
+// estado inicial al montar el componente
+filteredLists.value = props.lists;
+
+const logout = () => {
+    Inertia.post("logout");
+};
+
+const listaSeleccionada = ref(null);
+const editando = ref(false);
+const formData = ref({
+    nombre: "",
+    idioma: "",
+    nivel: "",
+});
+
+const mostrarLista = (list) => {
+    listaSeleccionada.value = list;
+    editando.value = false;
+};
+
+const abrirLista = (list) => {
+    Inertia.visit(`/lists/${list.id}/flashcards`);
+};
+
+const createNewList = () => {
+    Inertia.visit(`/lists/create`);
+};
+
+const deleteList = async (id) => {
+    if (confirm("¿Borrar lista?")) {
+        try {
+            await Inertia.delete(`/lists/${id}`);
+        } catch (error) {
+            console.error("Error al eliminar la lista:", error);
+        }
+    }
+};
+
+const visitGames = (id) =>
+    Inertia.visit(`/games/repasar?listId=${id}`, {
+        method: "get",
+    });
+
+const editarLista = (list) => {
+    formData.value = { ...list };
+    listaSeleccionada.value = list;
+    editando.value = true;
+};
+
+// guardar los cambios al editar
+const guardarLista = async () => {
+    try {
+        await Inertia.put(
+            `/lists/${listaSeleccionada.value.id}`,
+            formData.value
+        );
+        const updatedList = {
+            ...listaSeleccionada.value,
+            ...formData.value,
+        };
+        const index = lists.findIndex((list) => list.id === updatedList.id);
+        if (index !== -1) {
+            lists[index] = updatedList;
+        }
+        editando.value = false;
+    } catch (error) {
+        console.error("Error al actualizar la lista:", error);
+    }
+};
+
+const cancelEdit = () => {
+    editando.value = false;
+    formData.value = { ...listaSeleccionada.value };
+};
+</script>
